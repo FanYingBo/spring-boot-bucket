@@ -41,4 +41,45 @@ public class User {
     public void setRealname(String realname) {
         this.realname = realname;
     }
+
+    public static class Builder{
+
+        private String username;
+        private String password;
+        private String realname;
+        private String mobile;
+
+        public static Builder newBuilder(){
+            return new Builder();
+        }
+        public Builder username(String username) {
+            this.username = username;
+            return this;
+        }
+
+
+        public Builder password(String password) {
+            this.password = password;
+            return this;
+        }
+
+        public Builder realname(String realname) {
+            this.realname = realname;
+            return this;
+        }
+
+        public Builder mobile(String mobile) {
+            this.mobile = mobile;
+            return this;
+        }
+
+        public User build(){
+            User user = new User();
+            user.mobile = this.mobile;
+            user.password = this.password;
+            user.realname = this.realname;
+            user.username = this.username;
+            return user;
+        }
+    }
 }
