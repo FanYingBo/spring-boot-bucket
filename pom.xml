@@ -12,6 +12,7 @@
         <module>study-spring-boot</module>
         <module>study-spring-cloud</module>
         <module>spring-framework</module>
+        <module>spring-cloud-alibaba</module>
     </modules>
     <properties>
         <spring.cloud.ver>Hoxton.SR7</spring.cloud.ver>
