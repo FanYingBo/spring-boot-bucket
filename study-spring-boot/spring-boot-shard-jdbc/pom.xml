@@ -3,31 +3,32 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>spring-boot-bucket</artifactId>
+        <artifactId>study-spring-boot</artifactId>
         <groupId>com.study.spring</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>study-spring-boot</artifactId>
+    <artifactId>spring-boot-shard-jdbc</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>spring-boot-actuator</module>
-        <module>spring-boot-data</module>
-        <module>spring-boot-amqp</module>
-        <module>spring-boot-activemq</module>
-        <module>spring-boot-web</module>
-        <module>spring-boot-webflux</module>
-        <module>spring-boot-quartz</module>
-        <module>spring-boot-thymeleaf</module>
-        <module>spring-boot-web-base</module>
-        <module>spring-boot-shard-jdbc</module>
+        <module>sharging-jdbc-slicing</module>
+        <module>sharding-jdbc-master-slave</module>
     </modules>
+
+    <properties>
+        <spring.boot.sharding.jdbc.ver>3.1.0</spring.boot.sharding.jdbc.ver>
+        <spring.boot.mybatis.ver>2.0.1</spring.boot.mybatis.ver>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+
     </dependencies>
 
 </project>
