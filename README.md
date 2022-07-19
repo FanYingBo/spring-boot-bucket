@@ -1,6 +1,6 @@
 # 引
 
-该项目库用于跟进SpringFramework 相关技术SpringBoot SpringCloud，不同版本之间有差异或者新增内容，会采用案例（Demo）方式来实现相关技术，持续学习更新
+Spring Boot, Spring Cloud, Spring Cloud Alibaba 学习案例，融合主流中间件
 
 # spring-boot-bucket
 
