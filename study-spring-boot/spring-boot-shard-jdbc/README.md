@@ -68,3 +68,44 @@ POST添加user：http://localhost:8080/user/add
     "jobType": null
 }
 ```
+## 读写分离
+配置：
+````
+sharding.jdbc.datasource.names=master,slave1,slave2
+
+sharding.jdbc.datasource.master.type=com.alibaba.druid.pool.DruidDataSource
+sharding.jdbc.datasource.master.driver-class-name=com.mysql.cj.jdbc.Driver
+sharding.jdbc.datasource.master.url=jdbc:mysql://192.168.0.198:3306/userdb?characterEncoding=utf8
+sharding.jdbc.datasource.master.username=root
+sharding.jdbc.datasource.master.password=root123
+
+sharding.jdbc.datasource.slave1.type=com.alibaba.druid.pool.DruidDataSource
+sharding.jdbc.datasource.slave1.driver-class-name=com.mysql.cj.jdbc.Driver
+sharding.jdbc.datasource.slave1.url=jdbc:mysql://192.168.0.186:3306/userdb?characterEncoding=utf8
+sharding.jdbc.datasource.slave1.username=root
+sharding.jdbc.datasource.slave1.password=root123
+
+sharding.jdbc.datasource.slave2.type=com.alibaba.druid.pool.DruidDataSource
+sharding.jdbc.datasource.slave2.driver-class-name=com.mysql.cj.jdbc.Driver
+sharding.jdbc.datasource.slave2.url=jdbc:mysql://192.168.0.189:3306/userdb?characterEncoding=utf8
+sharding.jdbc.datasource.slave2.username=root
+sharding.jdbc.datasource.slave2.password=root123
+
+sharding.jdbc.config.masterslave.name=ms
+sharding.jdbc.config.masterslave.master-data-source-name=master
+sharding.jdbc.config.masterslave.slave-data-source-names=slave2,slave1
+````
+查询日志：
+``````
+2022-07-20 15:38:07.078  INFO 1244 --- [nio-8080-exec-9] ShardingSphere-SQL                       : Rule Type: master-slave
+2022-07-20 15:38:07.078  INFO 1244 --- [nio-8080-exec-9] ShardingSphere-SQL                       : SQL: SELECT * FROM user_master where user_id = ? ::: DataSources: slave2
+2022-07-20 15:38:08.977  INFO 1244 --- [io-8080-exec-10] ShardingSphere-SQL                       : Rule Type: master-slave
+2022-07-20 15:38:08.977  INFO 1244 --- [io-8080-exec-10] ShardingSphere-SQL                       : SQL: SELECT * FROM user_master where user_id = ? ::: DataSources: slave1
+``````
+插入日志：
+````
+2022-07-20 15:36:20.620  INFO 1244 --- [nio-8080-exec-4] ShardingSphere-SQL                       : Rule Type: master-slave
+2022-07-20 15:36:20.621  INFO 1244 --- [nio-8080-exec-4] ShardingSphere-SQL                       : SQL: insert into user_master (user_id, user_name, email, address, age, job_type)
+        values
+        (?, ?, ?, ?, ?, ?) ::: DataSources: master
+````
