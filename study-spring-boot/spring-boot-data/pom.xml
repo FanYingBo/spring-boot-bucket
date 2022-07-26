@@ -17,7 +17,15 @@
         <module>spring-data-mongodb</module>
         <module>spring-boot-redis</module>
         <module>spring-boot-elasticsearch</module>
+        <module>spring-boot-mybatis</module>
     </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+    </dependencies>
 
 
 </project>

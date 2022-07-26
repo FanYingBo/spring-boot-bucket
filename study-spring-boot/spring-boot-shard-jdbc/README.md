@@ -68,6 +68,20 @@ POST添加user：http://localhost:8080/user/add
     "jobType": null
 }
 ```
+不支持的SQL：
+不支持冗余括号、CASE WHEN、HAVING、UNION (ALL)，有限支持子查询。
+
+| SQL | 原因            |
+|-----|---------------|
+|NSERT INTO tbl_name (col1, col2, …) SELECT col1, col2, … FROM tbl_name WHERE col3 = ?| INSERT .. SEL |
+|INSERT INTO tbl_name SET col1 = ?| INSERT .. SET |
+|SELECT COUNT(col1) as count_alias FROM tbl_name GROUP BY col1 HAVING count_alias > ?| HAVING        |
+|SELECT * FROM tbl_name1 UNION SELECT * FROM tbl_name2|UNION|
+|SELECT * FROM tbl_name1 UNION ALL SELECT * FROM tbl_name2|UNION ALL|
+|SELECT * FROM tbl_name1 WHERE (val1=?) AND (val1=?)|冗余括号(MySQL数据库已支持)|
+|SELECT * FROM ds.tbl_name1|包含schema|
+|SELECT SUM(DISTINCT col1), SUM(col1) FROM tbl_name|详见DISTINCT支持情况详细说明|
+
 ## 读写分离
 配置：
 ````
