@@ -12,8 +12,8 @@
     <artifactId>spring-cloud-nacos</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>nacos-server</module>
         <module>nacos-config</module>
+        <module>nacos-registry</module>
     </modules>
     <dependencies>
         <dependency>
