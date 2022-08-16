@@ -1,0 +1,67 @@
+[
+  {
+  "id": null,
+  "name": "Kubernetes权威指南",
+  "author": "龚",
+  "publishedInformation": {
+    "editorInCharge": "张",
+    "printing": "三河市良远印务",
+    "publisher": "电子工业出版社",
+    "publishDate": "2021-06-14",
+    "price": 238
+  },
+  "intro": "Kubernetes 是由谷歌开源的容器集群管理系统"
+  },
+  {
+    "id" : null,
+    "name" : "Unix网络编程",
+    "author" : "Bill.Fenner",
+    "publishedInformation" : {
+      "editorInCharge" : "张",
+      "printing" : "三河市良远印务",
+      "publisher" : "电子工业出版社",
+      "publishDate" : "2003-08-13",
+      "price" : 56.05
+    },
+    "intro" : "面向Unix"
+  },
+  {
+    "id" : null,
+    "name" : "Docker实战",
+    "author" : "Jeck.Hengly",
+    "publishedInformation" : {
+      "editorInCharge" : "张",
+      "printing" : "三河市良远印务",
+      "publisher" : "电子工业出版社",
+      "publishDate" : "2021-08-13",
+      "price" : 78.05
+    },
+    "intro" : "Docker 提供了高效，敏捷和轻量级的容器方案"
+  },
+  {
+    "id": null,
+    "name": "Java并发编程实战",
+    "author": "Tim Peierls",
+    "publishedInformation": {
+      "editorInCharge": "张",
+      "printing": "三河市良远印务",
+      "publisher": "机械工业出版社",
+      "publishDate": "2012-06-14",
+      "price": 128
+    },
+    "intro": "并发编程时Java语言的重要特性之一"
+  },
+  {
+    "id" : null,
+    "name" : "Python开发与项目实战",
+    "author" : "范",
+    "publishedInformation" : {
+      "editorInCharge" : "张",
+      "printing" : "三河市良远印务",
+      "publisher" : "机械工业出版社",
+      "publishDate" : "2016-08-13",
+      "price" : 66.56
+    },
+    "intro" : "Python爬虫与web开发"
+  }
+]
