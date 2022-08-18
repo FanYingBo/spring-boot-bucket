@@ -1,15 +1,15 @@
 [
   {
-  "id": null,
-  "name": "Kubernetes权威指南",
-  "author": "龚",
-  "publishedInformation": {
-    "editorInCharge": "张",
-    "printing": "三河市良远印务",
-    "publisher": "电子工业出版社",
-    "publishDate": "2021-06-14",
-    "price": 238
-  },
+    "id": null,
+    "name": "Kubernetes权威指南",
+    "author": "龚",
+    "publishedInformation": {
+      "editorInCharge": "张",
+      "printing": "三河市良远印务",
+      "publisher": "电子工业出版社",
+      "publishDate": "2021-06-14",
+      "price": 238
+    },
   "intro": "Kubernetes 是由谷歌开源的容器集群管理系统"
   },
   {

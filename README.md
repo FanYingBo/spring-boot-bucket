@@ -14,6 +14,9 @@ Spring Boot, Spring Cloud, Spring Cloud Alibaba 学习案例，融合主流中�
 ### ShardingSphere
 [Example](study-spring-boot/spring-boot-shard-jdbc) \
 [Document Reference](study-spring-boot/spring-boot-shard-jdbc/README.md)
+### SpringBoot MongoDB
+[Example](study-spring-boot/spring-boot-data/spring-data-mongodb) \
+[Document Reference](study-spring-boot/spring-boot-data/spring-data-mongodb/README.md)
 ## Spring Cloud
 
 ## Spring Cloud Alibaba
