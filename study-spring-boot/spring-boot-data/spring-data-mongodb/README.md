@@ -172,7 +172,13 @@ mongofiles <options> <connection-string> <command> <filename or _id>
 ![img_5.png](img_5.png)
 * 主从副本集模式
 ![img_3.png](img_3.png)
-无投票权的成员同时具有votes并 priority等于0：
+主节点执行：
+>&gt; rs.initiate({_id:'dataA',members:[
+{_id:1,host:'192.168.0.186:27017',priority:3},
+{_id:2,host:'192.168.0.196:27017',priority:2},
+{_id:3,host:'192.168.0.189:27017',priority:1}]})
+
+无投票权的成员同时具有votes并且 priority等于0：
 ``````json
 {
    "_id" : "<num>",
@@ -192,11 +198,44 @@ mongofiles <options> <connection-string> <command> <filename or _id>
 * 副本节点（Secondary）: Seconary 会参与 Primary 选举，并从 Primary 同步最新写入的数据，以保证与 Primary 存储相同的数据（Seconary 默认不提供读写服务）
 * 仲裁者（Arbiter）: Arbiter 节点只参与投票，不能被选为 Primary，并且不从 Primary 同步数据 \
   ![img_2.png](img_2.png)
+副本模式案例：
+
+| 节点            | 角色         |
+|---------------|------------|
+| 192.168.0.186 | Primary    |
+| 192.168.0.196 | Secondary  |
+| 192.168.0.189 | Secondary  |
+| 192.168.0.198 | Arbiter    |
+配置：
+/etc/mongod.conf 添加：
+````yaml
+#副本名
+replication: 
+  replSetName: dataA
+````
+
+>&gt; rs.initiate({_id:'dataA',members:[
+  {_id:1,host:'192.168.0.186:27017',priority:3},
+  {_id:2,host:'192.168.0.196:27017',priority:2},
+  {_id:3,host:'192.168.0.189:27017',priority:1},
+  {_id:4,host:'192.168.0.198:27017',arbiterOnly:true}]})
+
+添加一个副本：
+>&gt; rs.add( { host: "192.168.0.185:27017", priority: 0 } )
+
+查看副本状态：
+>&gt; rs.status();
 副本集作用：
   1. 异地备份（数据冗余）
   2. 故障转移（服务冗余）
   3. 负载均衡（读写分类）
   4. 高可用基石（HA）
+SpringBoot MongoDB 配置：
+``````
+# replicaSet 副本名称 readPreference 读配置 secondary 优先
+  spring.data.mongodb.uri=mongodb://192.168.0.196:27017,192.168.0.189:27017,\
+     192.168.0.186:27017,192.168.0.198:27017/mytest?replicaSet=dataA&readPreference=secondaryPreferred
+``````
 #### 副本集同步原理：
 * 一个副本集最多可以有50 个成员，但只有 7 个投票成员。 
 * 要使用 MongoDB 5.3 或更高版本将多个仲裁器添加到副本集，请使用allowMultipleArbiters设置为的参数启动每个节点true：
@@ -236,12 +275,128 @@ mongod --setParameter allowMultipleArbiters=true
   * config servers：配置服务器存储集群的元数据和配置设置。
   
 MongoDB 在集合级别对数据进行分片，将集合数据分布在集群中的各个分片上。
-
-* 分片键 \
+* Server 配置：
+    * configServer 配置
+      ``````yaml
+      sharding:
+        clusterRole: configsvr //固定值
+      replication:
+        replSetName: dataB
+      net:
+        port: 27017
+        bindIp: 192.168.0.196
+      ``````
+    * shard 配置
+      ``````yaml
+      #shard 1
+      sharding:
+        clusterRole: shardsvr //固定值
+      replication:
+        replSetName: dataB
+      net:
+        port: 27017
+        bindIp: 192.168.0.198
+      ``````
+      ``````yaml
+      #shard 2
+      sharding:
+        clusterRole: shardsvr //固定值
+      replication:
+        replSetName: dataB
+      net:
+        port: 27017
+        bindIp: 192.168.0.186
+      ``````
+      ``````yaml
+      #shard 3
+      sharding:
+        clusterRole: shardsvr //固定值
+      replication:
+        replSetName: dataB
+      net:
+        port: 27017
+        bindIp: 192.168.0.189
+      ``````
+    * mongos 配置
+      ``````yaml
+       sharding:
+         configDB: dataB/192.168.0.196:27017
+       net:
+         port: 27018
+         bindIp: 192.168.0.189
+      ``````
+* configServer 配置启动，登录连接后执行(仅需要在一个configServer 上执行)
+> &gt; rs.initiate({_id: "dataB", configsvr: true, members: [{ _id : 0, host : "192.168.0.198:27017" }]})
+* shard 分片节点启动，登录连接后执行（仅在一个副本节点执行）
+> &gt; rs.initiate({_id: "dataB",members: [{ _id : 0, host : "192.168.0.198:27017" },{ _id : 1, host : "192.168.0.189:27017" },{ _id : 2, host : "192.168.0.186:27017" }]})
+* 启动mongos 节点，连接configServer
+ mongos -f /etc/mongos.conf  \
+ mongosh -host 192.168.0.196 -port 27017  //连接mongos
+  * 通过mongos添加分片节点
+  > &gt; sh.addShard( "dataB/192.168.0.198:27017,192.168.0.189:27017,192.168.0.186:27017")
+  * 设置分片的库 (从 MongoDB 6.0 开始，对集合进行分片不需要您首先运行sh.enableSharding()配置数据库的方法)
+  > &gt; sh.enableSharding(dbName)
+  * hash分片
+  > &gt; sh.shardCollection("records.people", { zipcode: 'hashed' } )
+  * 范围分片
+  > &gt; sh.shardCollection("records.people", { zipcode: 1 ...} )
+* sh.shardCollection 参数 
+> &gt; sh.shardCollection(
+"phonebook.contacts",
+  { last_name: "hashed" },
+  false,   // 是否唯一
+  {
+    numInitialChunks: 5,  // 初始块数
+    collation: { locale: "simple" }  // 可选，指定的集合shardCollection 具有默认排序规则，如果指定则必须包含
+  }
+)
+#### 分片键 
 MongoDB 使用分片键将集合的文档分布在分片之间。分片键由文档中的一个或多个字段组成。 \
 要对填充的集合进行分片，该集合必须具有 以分片键开头的索引。对空集合进行分片时，如果集合还没有指定分片键的适当索引，则 MongoDB 会创建支持索引
 * 分片策略 
   * 散列分片  \
     散列分片涉及计算分片键字段值的散列。然后根据散列的分片键值为每个块分配一个范围，MongoDB 在使用散列索引解析查询时会自动计算散列值。应用程序不需要计算哈希
   * 范围分片 \
-
+    范围分片涉及根据分片键值将数据划分为范围。然后根据分片键值为每个块分配一个范围。支持基于Shard Key的范围查询。
+* 优化分片键 \
+  优化集合的分片键可以实现更细粒度的数据分布，并且可以解决现有键由于 基数不足而导致巨块的情况。
+>  db.adminCommand( {
+  refineCollectionShardKey: "test.orders",
+  key: { customer_id: 1, order_id: 1 }
+  } )
+* 更改分片键 \
+  MongoDB 4.2 开始，您可以更新文档的分片键值，除非分片键字段是不可变_id字段。 \
+  更新分片键值时:
+  1. 你必须在一个mongos. 不要直接在分片上发出操作。
+  2. 您必须在事务中运行或作为可重试写入运行。
+  3. 您必须在查询过滤器的完整分片键上包含相等条件。例如，考虑一个用作分片键的messages 集合。{ activityid: 1, userid : 1 }要更新文档的分片键值，您必须包含activityid: <value>, userid: <value>在查询过滤器中。您可以根据需要在查询中包含其他字段。
+* 使用块进行数据分区
+  当块超过配置的块大小时，MongoDB 会拆分块。插入和更新都可以触发块拆分。\
+  一个块可以表示的最小范围是一个唯一的分片键值。不能拆分仅包含具有单个 shard key 值的文档的块
+  * 块大小
+  MongoDB 中的默认块大小为 128 兆字节。您可以 增加或减少块大小。考虑更改默认块大小的含义：
+  小块以更频繁的迁移为代价导致数据分布更均匀。这会在查询路由 ( mongos) 层产生开销。
+  大块导致更少的迁移。从网络角度和查询路由层的内部开销来看，这更有效。但是，这些效率是以数据可能分布不均为代价的。
+  块大小影响 每个要迁移的块的最大文档数。
+  分片现有集合时，块大小会影响最大集合大小 。分片后，块大小不限制集合大小。
+  * 大块分裂
+  拆分是一个防止块变得太大的过程。当一个块增长超过指定的块大小时，或者如果块中的文档数超过每个块要迁移的最大文档数，MongoDB 会根据块表示的分片键值拆分块。 \
+  一个块可以在必要时被分成多个块。插入和更新可能会触发拆分。拆分是一种有效的元数据更改。要创建拆分，MongoDB 不会迁移任何数据或影响分片。 \
+  拆分可能会导致跨分片的集合的块分布不均匀。在这种情况下，平衡器会在分片之间重新分配块。有关跨分片平衡块的更多详细信息，请参阅集群平衡器。
+  * 块迁移
+  MongoDB 迁移分片集群中的块，以在分片之间均匀分布分片集合的块。迁移可能是： 
+    * 手动的。仅在有限的情况下使用手动迁移，例如在批量插入期间分发数据。有关更多详细信息，请参阅手动迁移块。
+    * 自动的。当分片集合的块在分片中分布不均匀时，平衡器进程会自动迁移块。有关更多详细信息，请参阅迁移阈值。
+#### 分片集群平衡器
+MongoDB 平衡器是一个后台进程，用于监控 每个分片上的块数。当给定分片上的块数达到特定迁移阈值时，平衡器会尝试在分片之间自动迁移块并达到每个分片相同数量的块。 \
+分片集群的平衡过程对用户和应用层是完全透明的，尽管在过程发生时可能会有一些性能影响
+* 集群平衡器 \
+  平衡器进程负责在每个分片集合的分片之间重新分配分片集合的块。默认情况下，平衡器进程始终处于启用状态。 \
+  为了解决分片集合的不均匀块分布，平衡器将块从具有更多块的分片迁移到具有较少块数的分片。平衡器迁移块，直到跨分片的集合的块分布均匀。关于 chunk 迁移的详细信息，请参见Chunk 迁移过程。
+#### 分片数量和集群数量 
+  1. 分片集群仅用于解决海量数据的存储问题，且访问量不多。例如一个shard能存储M， 需要的存储总量是N，那么您的业务需要的shard和mongos数量按照以下公式计算：
+  numberOfShards = N/M/0.75 （假设容量水位线为75%）
+  numberOfMongos = 2+（对访问要求不高，至少部署2个mongos做高可用）
+  2. 分片集群用于解决高并发写入（或读取）数据的问题，但总的数据量很小。即shard和mongos需要满足读写性能需求，例如一个shard的最大QPS为M，一个mongos的最大QPS为Ms，业务需要的总QPS为Q，那么您的业务需要的shard和mongos数量按照以下公式计算：
+  numberOfShards = Q/M/0.75 （假设负载水位线为75%）
+  numberOfMongos = Q/Ms/0.75
