@@ -22,6 +22,7 @@
         <module>spring-boot-thymeleaf</module>
         <module>spring-boot-web-base</module>
         <module>spring-boot-shard-jdbc</module>
+        <module>spring-boot-rocketmq</module>
     </modules>
     <dependencies>
         <dependency>
