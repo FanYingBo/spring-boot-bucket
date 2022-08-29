@@ -36,6 +36,7 @@ public class NotifyController {
             rocketMQTemplate.send("localTest:TagA", MessageBuilder.withPayload(message).build());
             logger.info("Sent Success !!! {}", message);
         }
+
         return message;
     }
 }
