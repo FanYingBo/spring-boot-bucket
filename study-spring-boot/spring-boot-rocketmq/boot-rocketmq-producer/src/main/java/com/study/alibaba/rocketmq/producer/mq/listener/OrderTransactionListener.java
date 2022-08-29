@@ -26,6 +26,12 @@ public class OrderTransactionListener implements RocketMQLocalTransactionListene
     @Autowired
     private OrderService orderService;
 
+    /**
+     * 本地事务
+     * @param message
+     * @param o
+     * @return
+     */
     @Override
     public RocketMQLocalTransactionState executeLocalTransaction(Message message, Object o) {
         logger.info("on executeLocalTransaction transId: {}",
@@ -48,8 +54,16 @@ public class OrderTransactionListener implements RocketMQLocalTransactionListene
         return transState;
     }
 
+    /**
+     * 补偿事务
+     * 回查阶段
+     * @param message
+     * @return
+     */
     @Override
     public RocketMQLocalTransactionState checkLocalTransaction(Message message) {
+        // 如果broker master 发现事务没有提交或者提交未响应（RocketMQLocalTransactionState.UNKNOWN），
+        // 会通过listener 该方法检查交易状态，检查周期默认是1分钟
         logger.info("on checkLocalTransaction transId: {}",
                 message.getHeaders().get(RocketMQHeaders.TRANSACTION_ID));
         RocketMQLocalTransactionState state = getTransState(message);
@@ -73,6 +87,6 @@ public class OrderTransactionListener implements RocketMQLocalTransactionListene
                 return RocketMQLocalTransactionState.ROLLBACK;
             }
         }
-        return RocketMQLocalTransactionState.ROLLBACK;
+        return RocketMQLocalTransactionState.UNKNOWN;
     }
 }

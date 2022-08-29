@@ -40,10 +40,13 @@ public class OrderServiceImpl implements OrderService {
             logger.info("doOrderTransaction success , orderNumber: {}", orderNumber);
             orderStateManagement.changeOrderStateTo(orderNumber, OrderState.SUCCESS);
             return OrderState.SUCCESS;
+        }else if(nextInt > 5 && nextInt <= 8){
+            orderStateManagement.changeOrderStateTo(orderNumber, OrderState.FAILED);
+            return OrderState.FAILED;
         }
         // 订单事务处理异常
         logger.error("doOrderTransaction error , orderNumber: {}", orderNumber);
-        orderStateManagement.changeOrderStateTo(orderNumber, OrderState.FAILED);
-        return OrderState.FAILED;
+        orderStateManagement.changeOrderStateTo(orderNumber, OrderState.PENDING);
+        return OrderState.PENDING;
     }
 }
