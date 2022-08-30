@@ -1,0 +1,29 @@
+server:
+  port: 9090
+
+spring:
+  application:
+    name: rocketmq-stream-example
+  cloud:
+    stream:
+      rocketmq:
+        binder:
+         name-server: 192.168.0.196:9876;192.168.0.187:9876
+         # producer group
+         group: order_producer_group
+        bindings:
+          output:
+            destination: local_provider:TagA
+            contentType: application/json
+            producer:
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # 暴露bindings端点
+        include:
+          - bindings
+  endpoint:
+    bindings:
+      enabled: true

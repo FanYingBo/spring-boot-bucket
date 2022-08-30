@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: rocketmq-stream-example
+  cloud:
+    stream:
+      rocketmq:
+        binder:
+          name-server: 192.168.0.196:9876;192.168.0.187:9876
+          group: group_consumer
+      bindings:
+        input:
+          destination: local_provider
+          contentType: application/json
+          group: group_consumer
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # \u66B4\u9732bindings\u7AEF\u70B9
+        include:
+          - bindings
+  endpoint:
+    bindings:
+      enabled: true

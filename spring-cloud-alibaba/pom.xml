@@ -13,11 +13,22 @@
     <packaging>pom</packaging>
     <modules>
         <module>spring-cloud-nacos</module>
+        <module>spring-cloud-rocketmq</module>
     </modules>
-
     <properties>
+        <spring.cloud.alibaba>2.2.7.RELEASE</spring.cloud.alibaba>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
-
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring.cloud.alibaba}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
