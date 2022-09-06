@@ -14,9 +14,7 @@
         <module>spring-framework</module>
         <module>spring-cloud-alibaba</module>
     </modules>
-    <properties>
-        <spring.cloud.ver>Hoxton.SR7</spring.cloud.ver>
-    </properties>
+
     <parent>
         <artifactId>spring-boot-parent</artifactId>
         <groupId>org.springframework.boot</groupId>

@@ -4,22 +4,25 @@ server.port=8081
 eureka.instance.hostname=localhost
 eureka.instance.prefer-ip-address=false
 eureka.client.enabled=true
-#该节点不作为客户端获取注册中心
+
 eureka.client.fetch-registry=true
-#该节点不作为客户端向Eureka注册
+
 eureka.client.register-with-eureka=true
 
-#定时对Eureka服务导出的时间间隔
+
 eureka.client.eureka-service-url-poll-interval-seconds=5
 eureka.client.service-url.defaultZone=\
   http://localhost:8082/eureka/
 
 
-#通过DNS服务器获取Eureka的url集群信息
+
 eureka.client.use-dns-for-fetching-service-urls=false
-# 清理间隔（单位毫秒，默认是60*1000）
+#\u63A7\u5236\u5FC3\u8DF3\u5468\u671F\u95F4\u9694\u65F6\u95F4
+eureka.instance.lease-renewal-interval-in-seconds=10
+#\u6307\u5B9A\u8DDD\u79BB\u6700\u540E\u4E00\u6B21\u5FC3\u8DF3\u65F6\u95F4\u591A\u5C11\u79D2\u540E\u672A\u7EED\u7EA6,\u5219\u8BA9\u6CE8\u518C\u4E2D\u5FC3\u5254\u9664\u5B9E\u4F8B
+eureka.instance.lease-expiration-duration-in-seconds=10
+# \u670D\u52A1\u5254\u9664\u65F6\u95F4\u95F4\u9694
 eureka.server.eviction-interval-timer-in-ms=5000
 eureka.server.enable-self-preservation=true
 
-#指示群集节点之间的复制是否应批处理以提高网络效率。
-eureka.server.batch-replication=false
+eureka.server.batch-replication=true

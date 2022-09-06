@@ -16,6 +16,7 @@
         <module>spring-cloud-netflix-hystrix</module>
         <module>spring-cloud-netflix-zuul</module>
         <module>spring-cloud-netflix-ribbon</module>
+        <module>spring-cloud-netflix-openfeign</module>
     </modules>
 
 

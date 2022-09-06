@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: zuul-application
+
+eureka:
+  client:
+    enable: true
+    #是否可以被发现
+    register-with-eureka: true
+    #是否从eureka 读取注册的应用实例
+    fetch-registry: true
+    region: local
+    availability-zones:
+      local: local-zone1,local-zone2
+    service-url:
+      local-zone1: http://localhost:8081/eureka/
+      local-zone2: http://localhost:8082/eureka/
+    instance:
+      instance-id: ${spring.application.name}:${server.port}
+
+zuul:
+  routes:
+    user-service:
+      path: /userService/**
+    order-service:
+      path: /orderService/**
+ribbon:
+  ReadTimeout: 12000
+  ConnectTimeout: 12000
+  eureka:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - hystrix.stream
+          - beans
+          - env
+          - routes
+  endpoint:
+    hystrix:
+      stream:
+        enabled: true
+    beans:
+      enabled: true
+    env:
+      enabled: true
+    routes:
+      enabled: true
+    service-registry:
+      enabled: true

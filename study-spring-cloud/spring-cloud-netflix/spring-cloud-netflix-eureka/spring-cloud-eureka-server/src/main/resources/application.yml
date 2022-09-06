@@ -1,0 +1,31 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: eureka-server
+
+
+eureka:
+  instance:
+    hostname: localhost
+    prefer-ip-address: false
+    #指定距离最后一次心跳时间多少秒后未续约,则让注册中心剔除实例
+    lease-expiration-duration-in-seconds: 10
+    lease-renewal-interval-in-seconds: 10
+  client:
+    enabled: true
+    fetch-registry: true
+    register-with-eureka: true
+    use-dns-for-fetching-service-urls: false
+    region: local
+    availability-zones:
+      local: local-zone1,local-zone2
+    service-url:
+      local-zone1: http://localhost:8081/eureka/
+      local-zone2: http://localhost:8082/eureka/
+  server:
+    enable-self-preservation: false
+    batch-replication: true
+    eviction-interval-timer-in-ms: 5000
+    # 每个server状态更新时间间隔
+    peer-eureka-nodes-update-interval-ms: 1000

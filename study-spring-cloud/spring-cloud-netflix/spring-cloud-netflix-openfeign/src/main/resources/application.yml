@@ -1,0 +1,42 @@
+server:
+  port: 9093
+spring:
+  application:
+    name: fegin-client-demo
+eureka:
+  client:
+    enable: true
+    #是否可以被发现
+    register-with-eureka: true
+    #是否从eureka 读取注册的应用实例
+    fetch-registry: true
+    region: local
+    availability-zones:
+      local: local-zone1,local-zone2
+    service-url:
+      local-zone1: http://localhost:8081/eureka/
+      local-zone2: http://localhost:8082/eureka/
+    instance:
+      instance-id: ${spring.application.name}:${server.port}
+feign:
+  httpclient:
+    enabled: true
+  compression:
+    request:
+      # 是否压缩请求
+      enabled: true
+      mime-types:
+        - text/xml
+        - application/xml
+        - application/json
+      #当请求的数据容量达到多少的时候，使用压缩。默认是2048字节
+      min-request-size: 10
+  client:
+    config:
+      default:
+        loggerLevel: BASIC
+ribbon:
+  ReadTimeout: 12000
+  ConnectTimeout: 12000
+  eureka:
+    enabled: true
