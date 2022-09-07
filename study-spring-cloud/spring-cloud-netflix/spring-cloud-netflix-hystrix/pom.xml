@@ -10,6 +10,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>spring-cloud-netflix-hystrix</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>hystrix-simple-demo</module>
+    </modules>
 
 
 </project>

@@ -3,9 +3,11 @@ package self.study.spring.cloud.common.edm;
 public enum ResponseCode {
 
     OK(200, "Success"),
+    REQUEST_PARAM_ERROR(417, "Request Param Exception"),
     // server error code
     DB_ERROR(501, ""),
-    GATEWAY_ERROR(504, "Gateway error");
+    GATEWAY_ERROR(504, "Gateway error"),
+    REQUEST_TIME_OUT(506, "Request Time Out");
 
     int code;
     String msg;
