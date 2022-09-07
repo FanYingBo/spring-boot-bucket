@@ -179,7 +179,7 @@ ribbon:
   eureka:
     enabled: true
 ``````
-* [Eureka + Zuul + Ribbon + RateLimiter 网关案例限流](./spring-cloud-netflix/spring-cloud-netflix-zuul)
+* [Eureka + Zuul + Ribbon + RateLimiter 网关案例限流](./spring-cloud-netflix/spring-cloud-netflix-zuul/zuul-single-example)
 ``````java
 @SpringBootApplication
 @EnableZuulProxy
