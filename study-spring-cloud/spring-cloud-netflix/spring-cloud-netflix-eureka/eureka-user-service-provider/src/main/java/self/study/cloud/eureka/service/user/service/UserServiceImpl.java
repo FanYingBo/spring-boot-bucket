@@ -11,6 +11,7 @@ import self.study.spring.cloud.common.model.UserMaster;
 import self.study.spring.cloud.common.repository.UserMasterMapper;
 import self.study.spring.cloud.common.service.UserMasterService;
 
+import java.util.List;
 import java.util.Random;
 
 @Service("userService")
@@ -45,4 +46,16 @@ public class UserServiceImpl implements UserMasterService {
             return ResponseResult.commonResult(ResponseCode.DB_ERROR, e);
         }
     }
+
+    @Override
+    public ResponseResult<List<UserDTO>> getUserByUserIds(List<Long> userIds) {
+        return null;
+    }
+
+    @Override
+    public ResponseResult<UserDTO> getUserByUserId(Long userId) {
+        return null;
+    }
+
+
 }

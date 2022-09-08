@@ -1,6 +1,27 @@
 ## Hystrix
 * 线程隔离模式
 * 信号量模式
+### 功能
+* 对网络延迟及故障进行容错
+* 阻断分布式系统雪崩
+* 快速失败并平缓恢复
+* 服务降级
+* 实时监控、警报
+### 方案
+* 隔离
+* 降级
+* 熔断
+* 合并（缓存）
+### 配置类
+HystrixCommand 通过切面获取需要被断路隔离的方法  
+`com.netflix.hystrix.contrib.javanica.aop.aspectj.HystrixCommandAspect`  
+参数管理：
+`com.netflix.hystrix.contrib.javanica.conf.HystrixPropertiesManager` 参数名管理
+`com.netflix.hystrix.HystrixThreadPoolProperties` 线程隔离参数管理
+`com.netflix.hystrix.HystrixCommandProperties` 限流断路参数管理
+`com.netflix.hystrix.HystrixTimerThreadPoolProperties` 定时线程池参数管理  
+`com.netflix.hystrix.HystrixCollapserProperties` 请求合并参数管理
+### 案例
 ``````java
 @Service
 public class UserService implements UserMasterService {
@@ -13,7 +34,7 @@ public class UserService implements UserMasterService {
     @Override
     @HystrixCommand(fallbackMethod = "addUserTimeOutFailBack",
             commandProperties = {
-                    @HystrixProperty(name="execution.isolation.strategy",value = "THREAD"), // 线程隔离模式
+                    @HystrixProperty(name="execution.isolation.strategy",value = "THREAD"), // 线程隔离模式 
                     @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds",value = "3000"),
             })
     public ResponseResult<UserDTO> addUser(UserMaster userMaster) {

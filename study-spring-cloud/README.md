@@ -110,6 +110,7 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 ``````
+* [Hystrix 断路](./spring-cloud-netflix/spring-cloud-netflix-hystrix/hystrix-simple-demo)
 * [Eureka + OpenFeign 服务调用](./spring-cloud-netflix/spring-cloud-netflix-openfeign)
 启动方法：
 ``````java

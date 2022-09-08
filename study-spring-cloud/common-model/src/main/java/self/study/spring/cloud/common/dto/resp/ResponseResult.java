@@ -41,6 +41,10 @@ public class ResponseResult<T> {
         this.data = data;
     }
 
+    public static <T> ResponseResult<T> commonResult(int code, String msg, T data){
+        return new ResponseResult<>(code, msg, data);
+    }
+
     public static <T> ResponseResult<T> commonResult(ResponseCode responseCode, T data){
         return new ResponseResult<>(responseCode.getCode(), responseCode.getMsg(), data);
     }
