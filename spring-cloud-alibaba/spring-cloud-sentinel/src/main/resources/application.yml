@@ -1,0 +1,53 @@
+spring:
+  cloud:
+#    nacos:
+#      username: nacos
+#      password: nacos
+#      config:
+#        enable: true
+#        server-addr: 192.168.0.196:8848
+#        file-extension: yaml
+#        group: DEFAULT_GROUP
+#        refresh-enabled: true
+    sentinel:
+      transport:
+        dashboard: localhost:8080
+        # sentinel 暴漏API端口 http://localhost:8719/cnode?id=resourceName
+        port: 8719
+      datasource:
+        ds1:
+          nacos:
+            server-addr: 192.168.0.196:8848
+            # 不带后缀
+            dataId: ${spring.application.name}
+            groupId: SENTINEL-GROUP
+            username: nacos
+            password: nacos
+            dataType: json
+            ruleType: flow
+
+      log:
+        dir: ./target
+#mybatis:
+#  mapper-locations: classpath:mappers/*.xml
+#  type-aliases-packag: self.study.spring.cloud.common.model
+#  configuration:
+#    map-underscore-to-camel-case: true
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+server:
+  port: 9090
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    beans:
+      enabled: true
+    nacosconfig:
+      enabled: true
+    sentinel:
+      enabled: true
+

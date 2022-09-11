@@ -15,8 +15,6 @@ import self.study.spring.cloud.common.model.UserMaster;
 import self.study.spring.cloud.common.service.UserMasterService;
 
 import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
 
 @RestController

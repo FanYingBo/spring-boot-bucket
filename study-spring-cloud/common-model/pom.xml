@@ -15,5 +15,16 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
-
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>Project Release</name>
+            <url>http://192.168.0.196:8081/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>Project SNAPSHOTS</name>
+            <url>http://192.168.0.196:8081/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

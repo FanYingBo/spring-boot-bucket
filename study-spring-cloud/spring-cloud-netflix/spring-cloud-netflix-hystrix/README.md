@@ -76,3 +76,6 @@ public class UserService implements UserMasterService {
         return ResponseResult.commonResult(ResponseCode.REQUEST_TIME_OUT, "Add user time out ");
     }
 ``````
+
+## 问题
+Hystrix 通过 线程池隔离 的方式，来对依赖（在 Sentinel 的概念中对应 资源）进行了隔离。这样做的好处是资源和资源之间做到了最彻底的隔离。缺点是除了增加了线程切换的成本（过多的线程池导致线程数目过多），还需要预先给各个资源做线程池大小的分配，并且对于一些使用了 ThreadLocal 的场景来说会有问题（如 Spring 事务）。

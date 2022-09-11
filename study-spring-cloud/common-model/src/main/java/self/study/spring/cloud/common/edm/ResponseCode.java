@@ -7,8 +7,9 @@ public enum ResponseCode {
     OK(200, "Success"),
     REQUEST_PARAM_ERROR(417, "Request Param Exception"),
     // server error code
-    DB_ERROR(501, ""),
+    DB_ERROR(501, "Database Operation Exception"),
     GATEWAY_ERROR(504, "Gateway error"),
+    TOO_MANY_REQUEST(508, "TOO MANY REQUEST"),
     REQUEST_TIME_OUT(506, "Request Time Out");
 
     int code;
