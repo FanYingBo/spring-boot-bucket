@@ -108,13 +108,27 @@ FlowSlot 则用于根据预设的限流规则以及前面 slot 统计的状态�
 AuthoritySlot 则根据配置的黑白名单和调用来源信息，来做黑白名单控制；  
 DegradeSlot 则通过统计信息以及预设的规则，来做熔断降级；  
 SystemSlot 则通过系统的状态，例如 load1 等，来控制总的入口流量；  
-
+![img_1.png](img_1.png)
 ## 使用场景
 1. 流量控制
    * 并发线程控制
-   * QPS  
-     curl http://localhost:8719/cnode?id=resourceName
-2. 熔断降级
+   * QPS 流量控制 
+     访问资源信息 curl http://localhost:8719/cnode?id=resourceName
+     1. 直接拒绝（CONTROL_BEHAVIOR_DEFAULT）  
+        是默认的流量控制方式，当QPS超过任意规则的阈值后，新的请求就会被立即拒绝，拒绝方式为抛出FlowException。
+        这种方式适用于对系统处理能力确切已知的情况下，比如通过压测确定了系统的准确水位时。
+     2. Warm Up（CONTROL_BEHAVIOR_WARM_UP）  
+        即预热/冷启动方式。当系统长期处于低水位的情况下，当流量突然增加时，直接把系统拉升到高水位可能瞬间把系统压
+        垮。通过"冷启动"，让通过的流量缓慢增加，在一定时间内逐渐增加到阈值上限，给冷系统一个预热的时间，避免冷系统被压垮。
+     3. 匀速排队（CONTROL_BEHAVIOR_RATE_LIMITER，漏桶算法 ）
+        会严格控制请求通过的间隔时间，也即是让请求以均匀的速度通过，其实对应的是漏桶算法。当请求数量远远大于阈值时，这些请求会排队等待，这个等待时间可以设置，如果超过等待时间，那这个请求会被拒绝。这种方式主要用于处理间隔性突发的流量，例如消息队列。
+        属性设置：  
+        controlBehavior：RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER   
+        maxQueueingTimeMs：排队等待时间，表示每一次请求最长等待时间，默认是500ms
+     4. 冷启动+匀速器（CONTROL_BEHAVIOR_WARM_UP_RATE_LIMITER），除了让流量缓慢增
+        加，还还控制的了请求的间隔时间，让请求均匀速度通过。
+    
+2. 熔断降级`
 3. 系统自适应保护
 4. 集群流量控制
 5. 网关流量控制
