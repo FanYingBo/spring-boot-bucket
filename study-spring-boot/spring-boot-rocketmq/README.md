@@ -1,6 +1,53 @@
 # RocketMQ
 ![](img.png)
+RocketMQ 可以通过sentinel削峰填谷
+示例：
+```java
+@Component
+@RocketMQMessageListener(consumerGroup = "group_consumer", topic = "localTest",selectorExpression="*")
+public class ConsumerMessageSentinelListener implements RocketMQListener<String> {
 
+    private static Logger logger = LoggerFactory.getLogger(ConsumerMessageSentinelListener.class);
+
+    private AtomicInteger count = new AtomicInteger(0);
+    private static final String RESOURCE_TOPIC = "localTest";
+    @PostConstruct
+    private void initConfig(){
+        FlowRule rule = new FlowRule();
+        rule.setResource(RESOURCE_TOPIC); // 对应的 key 为 `groupName:topicName`
+        rule.setCount(5);
+        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);
+        rule.setLimitApp("default");
+        // 匀速器模式下，设置了 QPS 为 5，则请求每 200 ms 允许通过 1 个
+        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER);
+        // 如果更多的请求到达，这些请求会被置于虚拟的等待队列中。等待队列有一个 max timeout，如果请求预计的等待时间超过这个时间会直接被 block
+        // 在这里，timeout 为 5s
+        rule.setMaxQueueingTimeMs(5 * 1000);
+        FlowRuleManager.loadRules(Collections.singletonList(rule));
+    }
+    @Override
+    public void onMessage(String message) {
+
+        ContextUtil.enter(RESOURCE_TOPIC);
+        Entry entry = null;
+        try {
+            entry = SphU.entry(RESOURCE_TOPIC, EntryType.OUT);
+            int co = count.addAndGet(1);
+            logger.info("receive sentinel {} message: {} ", co, message);
+        } catch (BlockException e) {
+            e.printStackTrace();
+            // Blocked.
+            // NOTE: 在处理请求被拒绝的时候，需要根据需求决定是否需要重新消费消息
+            logger.warn("receive sentinel message: {} was gone",  message);
+        }finally {
+            if(entry != null){
+                entry.exit();
+            }
+
+        }
+    }
+}
+```
 ## RocketMQ Server
 
 ### RocketMQ Name Server
@@ -167,8 +214,6 @@ IndexFile索引文件为用户提供通过“按照Message Key查询消息”的
 * 延时消息
 * 批量消息
 * 过滤消息
-``````java
-public void subscribe(finalString topic, final MessageSelector messageSelector);
-``````
+
 * 事务消息
 参考 com.study.alibaba.rocketmq.producer.mq.listener.OrderTransactionListener 实现
