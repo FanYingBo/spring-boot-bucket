@@ -2,10 +2,18 @@ spring:
   application:
     name: zuul-application
   redis:
-
     host: 192.168.0.196
     port: 6379
     database: 0
+  zipkin:
+    base-url: http://192.168.0.189:9500
+    sender:
+      type: web
+  sleuth:
+    sampler:
+      #request采样的数量 默认是0.1 也即是10%，即采样10%的请求数据；
+      #因为在分布式系统中，数据量可能会非常大，因此采样非常重要我们示例数据少最好配置为1全采样，100%的采集会稍微影响一点性能
+      probability: 1.0
 eureka:
   client:
     enable: true
@@ -33,8 +41,8 @@ zuul:
     repository: REDIS  #对应存储类型（用来存储统计信息）
     behind-proxy: true  #代理之后
     default-policy: #可选 - 针对所有的路由配置的策略，除非特别配置了policies
-      limit: 5 #可选 - 每个刷新时间窗口对应的请求数量限制
-      quota: 4 #可选-  每个刷新时间窗口对应的请求时间限制（秒）
+      limit: 5000 #可选 - 每个刷新时间窗口对应的请求数量限制
+      quota: 20 #可选-  每个刷新时间窗口对应的请求时间限制（秒）
       refresh-interval: 5 # 刷新时间窗口的时间，默认值 (秒)
       type: #可选 限流方式
       - url
