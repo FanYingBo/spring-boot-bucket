@@ -3,6 +3,8 @@ server:
 spring:
   application:
     name: fegin-client-demo
+  zipkin:
+    base-url: http://192.168.0.189:9500
 eureka:
   client:
     enable: true

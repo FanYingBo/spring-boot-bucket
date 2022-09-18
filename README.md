@@ -1,6 +1,8 @@
 # 引
 
-Spring Boot, Spring Cloud, Spring Cloud Alibaba 学习案例，融合主流中间件
+Spring Boot, Spring Cloud, Spring Cloud Alibaba 学习案例，融合主流中间件  
+每个模块都有对组件原理的分析可供参考
+
 # 版本关系
 
 | SpringCloud版本	          | SpringBoot版本                                             |

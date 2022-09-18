@@ -6,6 +6,15 @@ spring:
     url: jdbc:mysql://192.168.0.196:6226/userdb?characterEncoding=utf8
     username: root
     password: root123
+  zipkin:
+    base-url: http://192.168.0.189:9500
+    sender:
+      type: web
+  sleuth:
+    sampler:
+      #request采样的数量 默认是0.1 也即是10%，即采样10%的请求数据；
+      #因为在分布式系统中，数据量可能会非常大，因此采样非常重要我们示例数据少最好配置为1全采样，100%的采集会稍微影响一点性能
+      probability: 1.0
 server:
   port: 9092
 eureka:
