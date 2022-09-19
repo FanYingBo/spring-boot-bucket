@@ -1,7 +1,6 @@
 package self.study.spring.boot.data.redis.controller;
 
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
+import org.redisson.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,4 +39,26 @@ public class TestController {
         return Boolean.TRUE;
     }
 
+    public void transaction(String key){
+        RTransaction transaction = null;
+        try{
+            transaction = redissonClient.createTransaction(TransactionOptions.defaults());
+//        RSetCache<Object> setCache = transaction.getSetCache(key);
+//        RCountDownLatch countDownLatch = setCache.getCountDownLatch(key);
+//        分布式闭锁
+//        countDownLatch.countDown();
+//        分布式信号量
+//        setCache.getSemaphore(key);
+//        分布式读写锁
+//        setCache.getReadWriteLock();
+            RMapCache<Object, Object> mapCache = transaction.getMapCache(key);
+            RBucket<Object> bucket = transaction.getBucket(key);
+            bucket.getAndSet(1);
+            mapCache.put("name", "tom");
+            transaction.commit();
+        }catch (Exception e){
+            transaction.rollback();
+        }
+
+    }
 }
