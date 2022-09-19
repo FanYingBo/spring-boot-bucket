@@ -1,0 +1,17 @@
+server:
+  port: 9091
+
+spring:
+  application:
+    name: redis-cache
+  redis:
+    database: 0
+    host: 192.168.0.196
+    node-address:
+      - redis://192.168.0.196:6379
+    port: 6376
+    timeout: 3000
+    lettuce:
+      pool:
+        max-active: 10
+        min-idle: 5
