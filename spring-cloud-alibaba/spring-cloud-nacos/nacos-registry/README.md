@@ -92,6 +92,59 @@ public class DatasourceConfigure {
 [Example](service-provider)
 
 ### LoadBalanced 原理分析
+* Bean的配置 ：  
+`org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration`  
+`org.springframework.cloud.netflix.ribbon.RibbonClientConfiguration`  
+[Nacos Server中的配置](./service-consumer/README.md)
+```java
+public class PropertiesFactory {
+
+  @Autowired
+  private Environment environment;
+
+  private Map<Class, String> classToProperty = new HashMap<>();
+  // 通过配置化参数决定生效的是那种方式
+  public PropertiesFactory() {
+    classToProperty.put(ILoadBalancer.class, "NFLoadBalancerClassName");
+    classToProperty.put(IPing.class, "NFLoadBalancerPingClassName");
+    classToProperty.put(IRule.class, "NFLoadBalancerRuleClassName");
+    classToProperty.put(ServerList.class, "NIWSServerListClassName");
+    classToProperty.put(ServerListFilter.class, "NIWSServerListFilterClassName");
+  }
+
+  public boolean isSet(Class clazz, String name) {
+    return StringUtils.hasText(getClassName(clazz, name));
+  }
+
+  public String getClassName(Class clazz, String name) {
+    if (this.classToProperty.containsKey(clazz)) {
+      String classNameProperty = this.classToProperty.get(clazz);
+      String className = environment
+              .getProperty(name + "." + NAMESPACE + "." + classNameProperty);
+      return className;
+    }
+    return null;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <C> C get(Class<C> clazz, IClientConfig config, String name) {
+    String className = getClassName(clazz, name);
+    if (StringUtils.hasText(className)) {
+      try {
+        Class<?> toInstantiate = Class.forName(className);
+        return (C) SpringClientFactory.instantiateWithConfig(toInstantiate,
+                config);
+      }
+      catch (ClassNotFoundException e) {
+        throw new IllegalArgumentException("Unknown class to load " + className
+                + " for class " + clazz + " named " + name);
+      }
+    }
+    return null;
+  }
+}
+ 
+```
 * RestTemplate 客户端 
   1. 初始化 `org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration`
 ```java
@@ -226,8 +279,10 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
         return nextInterceptor.intercept(request, body, this);
       }
       else {
+          //最终会调用该方法
         HttpMethod method = request.getMethod();
         Assert.state(method != null, "No standard HTTP method");
+        // org.springframework.http.client.SimpleBufferingClientHttpRequest
         ClientHttpRequest delegate = requestFactory.createRequest(request.getURI(), method);
         request.getHeaders().forEach((key, value) -> delegate.getHeaders().addAll(key, value));
         if (body.length > 0) {
@@ -277,13 +332,15 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 
 }
 ```
-  2. `org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient` 执行
+  5. `org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient` 执行
 ```java
 public class RibbonLoadBalancerClient implements LoadBalancerClient {
     //... ...
     public <T> T execute(String serviceId, LoadBalancerRequest<T> request, Object hint)
             throws IOException {
+        // 获取服务列表 默认是com.netflix.loadbalancer.ZoneAwareLoadBalancer
         ILoadBalancer loadBalancer = getLoadBalancer(serviceId);
+        // 选择服务 默认 com.netflix.loadbalancer.ZoneAwareLoadBalancer.chooseServer 选择服务器
         Server server = getServer(loadBalancer, hint);
         if (server == null) {
             throw new IllegalStateException("No instances available for " + serviceId);
@@ -311,6 +368,7 @@ public class RibbonLoadBalancerClient implements LoadBalancerClient {
         RibbonStatsRecorder statsRecorder = new RibbonStatsRecorder(context, server);
 
         try {
+            // 执行请求
             T returnVal = request.apply(serviceInstance);
             statsRecorder.recordStats(returnVal);
             return returnVal;
@@ -328,4 +386,89 @@ public class RibbonLoadBalancerClient implements LoadBalancerClient {
     }
 }
 ```
+  6. `org.springframework.cloud.client.loadbalancer.LoadBalancerRequestFactory`  
+```java
+public class LoadBalancerRequestFactory {
 
+	private LoadBalancerClient loadBalancer;
+
+	private List<LoadBalancerRequestTransformer> transformers;
+
+	public LoadBalancerRequestFactory(LoadBalancerClient loadBalancer,
+			List<LoadBalancerRequestTransformer> transformers) {
+		this.loadBalancer = loadBalancer;
+		this.transformers = transformers;
+	}
+
+	public LoadBalancerRequestFactory(LoadBalancerClient loadBalancer) {
+		this.loadBalancer = loadBalancer;
+	}
+    // 创建Request
+	public LoadBalancerRequest<ClientHttpResponse> createRequest(
+			final HttpRequest request, final byte[] body,
+			final ClientHttpRequestExecution execution) {
+		return instance -> {
+			HttpRequest serviceRequest = new ServiceRequestWrapper(request, instance,
+					this.loadBalancer);
+			if (this.transformers != null) {
+				for (LoadBalancerRequestTransformer transformer : this.transformers) {
+					serviceRequest = transformer.transformRequest(serviceRequest,
+							instance);
+				}
+			}
+            //InterceptingRequestExecution#execute
+            // org.springframework.http.client.SimpleBufferingClientHttpRequest#execute
+			return execution.execute(serviceRequest, body);
+		};
+	}
+
+}
+```
+## 集成Nacos服务发现
+* `com.netflix.loadbalancer.ZoneAwareLoadBalancer`
+```java
+public class ZoneAwareLoadBalancer<T extends Server> extends DynamicServerListLoadBalancer<T> {
+    // ... ...
+  // 选择服务
+  @Override
+  public Server chooseServer(Object key) {
+    if (!ENABLED.get() || getLoadBalancerStats().getAvailableZones().size() <= 1) {
+      logger.debug("Zone aware logic disabled or there is only one zone");
+      return super.chooseServer(key);
+    }
+    Server server = null;
+    try {
+      LoadBalancerStats lbStats = getLoadBalancerStats();
+      Map<String, ZoneSnapshot> zoneSnapshot = ZoneAvoidanceRule.createSnapshot(lbStats);
+      logger.debug("Zone snapshots: {}", zoneSnapshot);
+      if (triggeringLoad == null) {
+        triggeringLoad = DynamicPropertyFactory.getInstance().getDoubleProperty(
+                "ZoneAwareNIWSDiscoveryLoadBalancer." + this.getName() + ".triggeringLoadPerServerThreshold", 0.2d);
+      }
+
+      if (triggeringBlackoutPercentage == null) {
+        triggeringBlackoutPercentage = DynamicPropertyFactory.getInstance().getDoubleProperty(
+                "ZoneAwareNIWSDiscoveryLoadBalancer." + this.getName() + ".avoidZoneWithBlackoutPercetage", 0.99999d);
+      }
+      Set<String> availableZones = ZoneAvoidanceRule.getAvailableZones(zoneSnapshot, triggeringLoad.get(), triggeringBlackoutPercentage.get());
+      logger.debug("Available zones: {}", availableZones);
+      if (availableZones != null &&  availableZones.size() < zoneSnapshot.keySet().size()) {
+        String zone = ZoneAvoidanceRule.randomChooseZone(zoneSnapshot, availableZones);
+        logger.debug("Zone chosen: {}", zone);
+        if (zone != null) {
+          BaseLoadBalancer zoneLoadBalancer = getLoadBalancer(zone);
+          server = zoneLoadBalancer.chooseServer(key);
+        }
+      }
+    } catch (Exception e) {
+      logger.error("Error choosing server using zone aware logic for load balancer={}", name, e);
+    }
+    if (server != null) {
+      return server;
+    } else {
+      logger.debug("Zone avoidance logic is not invoked.");
+      return super.chooseServer(key);
+    }
+  }
+}
+```
