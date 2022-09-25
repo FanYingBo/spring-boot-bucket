@@ -81,3 +81,5 @@ Spring Boot, Spring Cloud, Spring Cloud Alibaba 学习案例，融合主流中�
 [Example](spring-cloud-alibaba/spring-cloud-nacos/nacos-registry)  
 [Document Reference](spring-cloud-alibaba/spring-cloud-nacos/nacos-registry/README.md)  
 ### RocketMQ
+[Example](study-spring-boot/spring-boot-rocketmq)  
+[Document Reference](study-spring-boot/spring-boot-rocketmq/README.md)  
