@@ -4,7 +4,8 @@ ShardingSphere是一套开源的分布式数据库中间件解决方案组成的
 它由Sharding-JDBC、Sharding-Proxy和Sharding-Sidecar（计划中）
 这3款相互独立的产品组成。 他们均提供标准化的数据分片、分布式事务和
 数据库治理功能 \
-[官方文档](https://shardingsphere.apache.org/document/legacy/3.x/document/cn/features/sharding/concept/sharding/)
+[3.x官方文档](https://shardingsphere.apache.org/document/legacy/3.x/document/cn/features/sharding/concept/sharding/)
+[4.x官方文档](https://shardingsphere.apache.org/document/legacy/4.x/document/cn/manual/sharding-jdbc/usage/sharding/)
 ## 概念&功能
 ### 数据分片
 1. SQL
